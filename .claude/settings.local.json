@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cat:*)",
+      "Bash(..specifyscriptspowershellcreate-new-feature.ps1 -Json \"@specify.txt\")",
+      "Bash(powershell:*)",
+      "Bash(..specifyscriptspowershellcreate-new-feature.ps1 -Json \"High-Performance Browser Emulation Module for Cloudflare Challenge Research - A Python module that enables researchers to conduct legitimate testing and analysis of Cloudflare-protected infrastructure by emulating browser behavior at scale for security research, performance analysis, and quality assurance purposes\")",
+      "Bash(pwsh:*)",
+      "Bash(git checkout:*)",
+      "Bash(git branch:*)",
+      "WebSearch",
+      "Bash(pip install:*)",
+      "Bash(python:*)",
+      "Bash(dir:*)",
+      "Bash(timeout 30 python -m pytest tests/contract/ --tb=no)",
+      "Bash(findstr:*)",
+      "Bash(coverage run:*)",
+      "Bash(coverage report:*)",
+      "Bash(find:*)",
+      "Bash(pip show:*)",
+      "Bash(pip uninstall:*)",
+      "Read(//c/Users/cameron/AppData/Local/Programs/Python/Python313/Lib/site-packages/mini_racer-0.12.4.dist-info/**)",
+      "Bash(timeout 30 python tests/high_concurrency_test.py)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

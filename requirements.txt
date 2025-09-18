@@ -1,0 +1,36 @@
+# Core Dependencies for cloudflare_research module
+# High-performance browser emulation for Cloudflare challenge research
+
+# TLS Fingerprinting (Primary)
+curl_cffi>=0.5.0
+
+# Async HTTP Client
+aiohttp>=3.9.0
+
+# High-performance event loop (Unix/Linux only)
+uvloop>=0.19.0; sys_platform != "win32"
+
+# JavaScript execution for challenges
+mini-racer>=0.12.0
+
+# Rate limiting and throttling
+asyncio-throttle>=1.0.0
+
+# Type hints and validation
+typing-extensions>=4.0.0
+
+# Async utilities
+anyio>=3.6.0
+
+# Data structures and utilities
+pydantic>=2.0.0
+
+# Development and Testing Dependencies
+# Install with: pip install -e ".[dev]"
+# pytest>=7.0.0
+# pytest-asyncio>=0.21.0
+# pytest-cov>=4.0.0
+# black>=23.0.0
+# flake8>=6.0.0
+# mypy>=1.0.0
+# sphinx>=5.0.0

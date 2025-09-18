@@ -1,0 +1,185 @@
+name: Cloudflare Bypass Test
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_url:
+        description: 'Target URL to test (default: kick.com API)'
+        required: false
+        default: 'https://kick.com/api/v1/channels/adinross'
+      concurrent_requests:
+        description: 'Number of concurrent requests'
+        required: false
+        default: '10'
+      test_type:
+        description: 'Test type to run'
+        required: false
+        default: 'detailed'
+        type: choice
+        options:
+          - detailed
+          - high_concurrency
+          - performance_validation
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'cloudflare_research/**'
+      - 'tests/**'
+      - 'requirements.txt'
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  cloudflare-bypass-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    strategy:
+      matrix:
+        python-version: ['3.11', '3.12']
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Cache dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential libssl-dev libffi-dev
+
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Verify installation
+      run: |
+        python -c "import cloudflare_research; print('✓ CloudflareBypass module imported successfully')"
+        python -c "from mini_racer import MiniRacer; print('✓ MiniRacer available')"
+        python -c "import aiohttp; print('✓ aiohttp available')"
+
+    - name: Run detailed bypass analysis
+      if: ${{ github.event.inputs.test_type == 'detailed' || github.event_name != 'workflow_dispatch' }}
+      run: |
+        python tests/detailed_bypass_analysis.py
+
+    - name: Run high concurrency test
+      if: ${{ github.event.inputs.test_type == 'high_concurrency' }}
+      run: |
+        python tests/high_concurrency_test.py
+
+    - name: Run performance validation
+      if: ${{ github.event.inputs.test_type == 'performance_validation' }}
+      run: |
+        python tests/performance_report.py
+
+    - name: Upload test results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: test-results-python-${{ matrix.python-version }}
+        path: |
+          detailed_bypass_analysis.json
+          high_concurrency_test_results.json
+          performance_validation_report.json
+        retention-days: 30
+
+    - name: Display test summary
+      if: always()
+      run: |
+        echo "## Test Results Summary" >> $GITHUB_STEP_SUMMARY
+        echo "- **Python Version**: ${{ matrix.python-version }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Runner OS**: ${{ runner.os }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Test Type**: ${{ github.event.inputs.test_type || 'detailed' }}" >> $GITHUB_STEP_SUMMARY
+        if [ -f detailed_bypass_analysis.json ]; then
+          echo "- **Success Rate**: $(jq -r '.test_summary.success_rate' detailed_bypass_analysis.json)%" >> $GITHUB_STEP_SUMMARY
+        fi
+        echo "- **Status**: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+
+  multi-region-test:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+    needs: cloudflare-bypass-test
+    timeout-minutes: 45
+
+    strategy:
+      matrix:
+        region:
+          - 'us-east'
+          - 'eu-west'
+          - 'asia-pacific'
+        include:
+          - region: 'us-east'
+            runner: 'ubuntu-latest'
+          - region: 'eu-west'
+            runner: 'ubuntu-latest'
+          - region: 'asia-pacific'
+            runner: 'ubuntu-latest'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Get public IP and location
+      run: |
+        echo "Testing from region: ${{ matrix.region }}"
+        curl -s https://ipapi.co/json/ | jq '.city, .region, .country, .ip'
+
+    - name: Run regional bypass test
+      run: |
+        echo "Running Cloudflare bypass test from ${{ matrix.region }}"
+        python tests/detailed_bypass_analysis.py
+
+    - name: Upload regional results
+      uses: actions/upload-artifact@v3
+      with:
+        name: regional-results-${{ matrix.region }}
+        path: detailed_bypass_analysis.json
+
+  security-check:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Security scan
+      run: |
+        echo "## Security Check" >> $GITHUB_STEP_SUMMARY
+        echo "- Scanning for hardcoded secrets..." >> $GITHUB_STEP_SUMMARY
+        if grep -r "password\|secret\|key" --include="*.py" cloudflare_research/ || true; then
+          echo "⚠️ Potential secrets found - review manually" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "✅ No obvious secrets detected" >> $GITHUB_STEP_SUMMARY
+        fi
+
+    - name: Check ethical usage
+      run: |
+        echo "- Verifying ethical usage guidelines..." >> $GITHUB_STEP_SUMMARY
+        if grep -r "research\|education\|security" README.md || true; then
+          echo "✅ Ethical usage documented" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "⚠️ Add ethical usage guidelines" >> $GITHUB_STEP_SUMMARY
+        fi

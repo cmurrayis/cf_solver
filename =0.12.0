@@ -1,0 +1,6 @@
+Collecting mini-racer
+  Downloading mini_racer-0.12.4-py3-none-win_amd64.whl.metadata (18 kB)
+Downloading mini_racer-0.12.4-py3-none-win_amd64.whl (13.7 MB)
+   ---------------------------------------- 13.7/13.7 MB 2.3 MB/s  0:00:05
+Installing collected packages: mini-racer
+Successfully installed mini-racer-0.12.4

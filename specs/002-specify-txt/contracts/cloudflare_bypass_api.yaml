@@ -1,0 +1,631 @@
+openapi: 3.0.3
+info:
+  title: Cloudflare Research Bypass API
+  description: |
+    High-performance browser emulation module for testing Cloudflare-protected infrastructure.
+    Designed for legitimate research and testing of infrastructure that you own or have permission to test.
+  version: 1.0.0
+  contact:
+    name: CF Solver Research Module
+    email: research@example.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://api.example.com/v1
+    description: Local testing server
+
+tags:
+  - name: requests
+    description: Browser emulation request operations
+  - name: sessions
+    description: Test session management
+  - name: challenges
+    description: Challenge detection and solving
+  - name: metrics
+    description: Performance and analytics data
+
+paths:
+  /requests:
+    post:
+      tags: [requests]
+      summary: Execute single browser emulation request
+      description: |
+        Perform a single HTTP request with full Chrome browser emulation,
+        including TLS fingerprinting and challenge solving.
+      operationId: executeRequest
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestConfig'
+            examples:
+              simple_get:
+                summary: Simple GET request
+                value:
+                  url: "https://example.com"
+                  method: "GET"
+                  browser_version: "124.0.0.0"
+              post_with_data:
+                summary: POST request with data
+                value:
+                  url: "https://api.example.com/data"
+                  method: "POST"
+                  headers:
+                    Content-Type: "application/json"
+                  body: '{"key": "value"}'
+                  browser_version: "124.0.0.0"
+      responses:
+        '200':
+          description: Request executed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RequestResult'
+        '400':
+          description: Invalid request configuration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /requests/batch:
+    post:
+      tags: [requests]
+      summary: Execute multiple requests concurrently
+      description: |
+        Execute up to 10,000 concurrent requests with full browser emulation.
+        Supports automatic rate limiting and backpressure handling.
+      operationId: executeBatchRequests
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchRequestConfig'
+      responses:
+        '200':
+          description: Batch requests executed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchRequestResult'
+        '400':
+          description: Invalid batch configuration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /sessions:
+    post:
+      tags: [sessions]
+      summary: Create new test session
+      description: Create a new testing session with configuration and limits
+      operationId: createSession
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SessionConfig'
+      responses:
+        '201':
+          description: Session created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Session'
+        '400':
+          description: Invalid session configuration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /sessions/{sessionId}:
+    get:
+      tags: [sessions]
+      summary: Get session details
+      description: Retrieve session information and current status
+      operationId: getSession
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Session details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Session'
+        '404':
+          description: Session not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      tags: [sessions]
+      summary: Terminate session
+      description: Stop session and cleanup resources
+      operationId: terminateSession
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Session terminated successfully
+        '404':
+          description: Session not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /sessions/{sessionId}/metrics:
+    get:
+      tags: [metrics]
+      summary: Get session performance metrics
+      description: Retrieve detailed performance metrics for a session
+      operationId: getSessionMetrics
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: format
+          in: query
+          description: Export format for metrics data
+          schema:
+            type: string
+            enum: [json, csv]
+            default: json
+      responses:
+        '200':
+          description: Session metrics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PerformanceMetrics'
+            text/csv:
+              schema:
+                type: string
+                description: CSV formatted metrics data
+
+  /challenges/{challengeId}:
+    get:
+      tags: [challenges]
+      summary: Get challenge details
+      description: Retrieve information about a detected challenge
+      operationId: getChallenge
+      parameters:
+        - name: challengeId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Challenge details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Challenge'
+        '404':
+          description: Challenge not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    RequestConfig:
+      type: object
+      required:
+        - url
+        - method
+      properties:
+        url:
+          type: string
+          format: uri
+          description: Target URL for the request
+          example: "https://example.com/api/endpoint"
+        method:
+          type: string
+          enum: [GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS]
+          description: HTTP method
+          example: "GET"
+        headers:
+          type: object
+          additionalProperties:
+            type: string
+          description: Custom HTTP headers
+          example:
+            Accept: "application/json"
+            Authorization: "Bearer token123"
+        body:
+          type: string
+          description: Request body content
+          example: '{"data": "value"}'
+        browser_version:
+          type: string
+          pattern: '^\d+\.\d+\.\d+\.\d+$'
+          description: Chrome version to emulate
+          example: "124.0.0.0"
+          default: "124.0.0.0"
+        timeout:
+          type: integer
+          minimum: 1
+          maximum: 300
+          description: Request timeout in seconds
+          example: 30
+          default: 30
+        proxy:
+          $ref: '#/components/schemas/ProxyConfig'
+
+    BatchRequestConfig:
+      type: object
+      required:
+        - requests
+      properties:
+        requests:
+          type: array
+          items:
+            $ref: '#/components/schemas/RequestConfig'
+          maxItems: 10000
+          description: Array of request configurations to execute
+        max_concurrent:
+          type: integer
+          minimum: 1
+          maximum: 10000
+          description: Maximum concurrent requests
+          example: 100
+          default: 100
+        rate_limit:
+          type: number
+          minimum: 0.1
+          description: Requests per second limit
+          example: 10.0
+        session_config:
+          $ref: '#/components/schemas/SessionConfig'
+
+    SessionConfig:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Human-readable session name
+          example: "Load Test Session 1"
+        description:
+          type: string
+          description: Optional session description
+          example: "Testing API endpoints under load"
+        browser_version:
+          type: string
+          pattern: '^\d+\.\d+\.\d+\.\d+$'
+          description: Chrome version to emulate
+          example: "124.0.0.0"
+          default: "124.0.0.0"
+        concurrency_limit:
+          type: integer
+          minimum: 1
+          maximum: 10000
+          description: Maximum concurrent requests
+          example: 100
+          default: 100
+        rate_limit:
+          type: number
+          minimum: 0.1
+          description: Requests per second limit
+          example: 10.0
+        default_timeout:
+          type: integer
+          minimum: 1
+          maximum: 300
+          description: Default request timeout in seconds
+          example: 30
+          default: 30
+
+    ProxyConfig:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [http, https, socks4, socks5]
+          description: Proxy protocol type
+          example: "http"
+        host:
+          type: string
+          description: Proxy server hostname
+          example: "proxy.example.com"
+        port:
+          type: integer
+          minimum: 1
+          maximum: 65535
+          description: Proxy server port
+          example: 8080
+        username:
+          type: string
+          description: Proxy authentication username
+        password:
+          type: string
+          description: Proxy authentication password
+
+    RequestResult:
+      type: object
+      properties:
+        request_id:
+          type: string
+          format: uuid
+          description: Unique request identifier
+        url:
+          type: string
+          format: uri
+          description: Original request URL
+        status_code:
+          type: integer
+          description: HTTP response status code
+          example: 200
+        headers:
+          type: object
+          additionalProperties:
+            type: string
+          description: Response headers
+        body:
+          type: string
+          description: Response body content
+        timing:
+          $ref: '#/components/schemas/RequestTiming'
+        challenge:
+          $ref: '#/components/schemas/Challenge'
+        success:
+          type: boolean
+          description: Whether request completed successfully
+        error:
+          type: string
+          description: Error message if request failed
+
+    BatchRequestResult:
+      type: object
+      properties:
+        session_id:
+          type: string
+          format: uuid
+          description: Session identifier for the batch
+        total_requests:
+          type: integer
+          description: Total number of requests in batch
+        completed_requests:
+          type: integer
+          description: Number of successfully completed requests
+        failed_requests:
+          type: integer
+          description: Number of failed requests
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/RequestResult'
+        summary:
+          $ref: '#/components/schemas/BatchSummary'
+
+    BatchSummary:
+      type: object
+      properties:
+        duration_ms:
+          type: integer
+          description: Total batch execution time in milliseconds
+        requests_per_second:
+          type: number
+          description: Average throughput
+        success_rate:
+          type: number
+          minimum: 0
+          maximum: 100
+          description: Success rate percentage
+        challenges_encountered:
+          type: integer
+          description: Number of challenges detected and solved
+        challenge_solve_rate:
+          type: number
+          minimum: 0
+          maximum: 100
+          description: Challenge solving success rate
+
+    Session:
+      type: object
+      properties:
+        session_id:
+          type: string
+          format: uuid
+          description: Unique session identifier
+        name:
+          type: string
+          description: Session name
+        status:
+          type: string
+          enum: [created, running, completed, cancelled, failed]
+          description: Current session status
+        config:
+          $ref: '#/components/schemas/SessionConfig'
+        stats:
+          type: object
+          properties:
+            total_requests:
+              type: integer
+            completed_requests:
+              type: integer
+            failed_requests:
+              type: integer
+            challenges_encountered:
+              type: integer
+        created_at:
+          type: string
+          format: date-time
+          description: Session creation timestamp
+        started_at:
+          type: string
+          format: date-time
+          description: Session start timestamp
+        completed_at:
+          type: string
+          format: date-time
+          description: Session completion timestamp
+
+    Challenge:
+      type: object
+      properties:
+        challenge_id:
+          type: string
+          format: uuid
+          description: Unique challenge identifier
+        request_id:
+          type: string
+          format: uuid
+          description: Associated request identifier
+        type:
+          type: string
+          enum: [javascript, turnstile, managed, rate_limit, unknown]
+          description: Type of challenge detected
+        url:
+          type: string
+          format: uri
+          description: URL where challenge was encountered
+        solved:
+          type: boolean
+          description: Whether challenge was successfully solved
+        solve_duration_ms:
+          type: integer
+          description: Time taken to solve challenge in milliseconds
+        error_message:
+          type: string
+          description: Error details if solving failed
+        detected_at:
+          type: string
+          format: date-time
+          description: Challenge detection timestamp
+        solved_at:
+          type: string
+          format: date-time
+          description: Challenge solution timestamp
+
+    RequestTiming:
+      type: object
+      properties:
+        dns_resolution_ms:
+          type: integer
+          description: DNS resolution time in milliseconds
+        tcp_connection_ms:
+          type: integer
+          description: TCP connection establishment time
+        tls_handshake_ms:
+          type: integer
+          description: TLS handshake time
+        request_sent_ms:
+          type: integer
+          description: Time to send request
+        response_received_ms:
+          type: integer
+          description: Time to receive response
+        total_duration_ms:
+          type: integer
+          description: Total request duration
+
+    PerformanceMetrics:
+      type: object
+      properties:
+        session_id:
+          type: string
+          format: uuid
+        total_requests:
+          type: integer
+        successful_requests:
+          type: integer
+        failed_requests:
+          type: integer
+        avg_response_time_ms:
+          type: number
+        min_response_time_ms:
+          type: integer
+        max_response_time_ms:
+          type: integer
+        p95_response_time_ms:
+          type: number
+        p99_response_time_ms:
+          type: number
+        requests_per_second:
+          type: number
+        concurrent_connections_peak:
+          type: integer
+        memory_usage_mb:
+          type: number
+        cpu_usage_percent:
+          type: number
+        challenges_total:
+          type: integer
+        challenges_solved:
+          type: integer
+        challenge_solve_rate:
+          type: number
+
+    Error:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          description: Error type identifier
+          example: "validation_error"
+        message:
+          type: string
+          description: Human-readable error message
+          example: "Invalid URL format provided"
+        details:
+          type: object
+          description: Additional error details
+        request_id:
+          type: string
+          format: uuid
+          description: Request identifier for tracking
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - BearerAuth: []
+
+externalDocs:
+  description: Cloudflare Research Module Documentation
+  url: https://docs.example.com/cloudflare-research
