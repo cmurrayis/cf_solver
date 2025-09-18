@@ -1,0 +1,15 @@
+# Sphinx documentation requirements
+sphinx>=7.1.0
+sphinx-rtd-theme>=1.3.0
+sphinx-autodoc-typehints>=1.24.0
+
+# For Napoleon extension (Google/NumPy style docstrings)
+# Already included in sphinx
+
+# For reading the main package
+# These match the main requirements.txt
+aiohttp>=3.9.0
+curl-cffi>=0.6.2
+mini-racer>=0.12.0
+pydantic>=2.5.0
+yarl>=1.9.0

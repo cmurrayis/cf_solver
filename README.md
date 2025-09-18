@@ -31,12 +31,30 @@ Recent test results against Cloudflare-protected infrastructure:
 
 ## Quick Start
 
+### System Requirements
+
+- **Python**: 3.11 or higher
+- **Operating System**: Windows, macOS, or Linux
+- **Memory**: Minimum 2GB RAM (8GB+ recommended for high concurrency)
+- **Network**: Stable internet connection
+
 ### Installation
+
+#### Method 1: Standard Installation (Recommended)
 
 ```bash
 # Clone the repository
 git clone https://github.com/yourusername/cloudflare-bypass-research.git
 cd cloudflare-bypass-research
+
+# Create virtual environment (recommended)
+python -m venv venv
+
+# Activate virtual environment
+# Windows:
+venv\Scripts\activate
+# macOS/Linux:
+source venv/bin/activate
 
 # Install dependencies
 pip install -r requirements.txt
@@ -45,13 +63,54 @@ pip install -r requirements.txt
 python -c "import cloudflare_research; print('Installation successful')"
 ```
 
-### Basic Usage
+#### Method 2: Docker Installation
+
+```bash
+# Build Docker image
+docker build -t cloudflare-bypass .
+
+# Run in container
+docker run -it cloudflare-bypass python -c "import cloudflare_research"
+```
+
+#### Troubleshooting Installation
+
+**Windows**: If you encounter build errors, install Visual Studio Build Tools:
+```bash
+# Download from Microsoft and install C++ build tools
+# Then retry installation
+pip install -r requirements.txt
+```
+
+**Linux**: Install system dependencies:
+```bash
+# Ubuntu/Debian
+sudo apt update
+sudo apt install python3.11-dev libcurl4-openssl-dev build-essential
+
+# CentOS/RHEL
+sudo yum install python3-devel libcurl-devel gcc
+```
+
+**macOS**: Install development tools:
+```bash
+# Install Xcode command line tools
+xcode-select --install
+
+# Install via Homebrew (optional)
+brew install python@3.11 curl
+```
+
+### Basic Usage Examples
+
+#### Simple Request Example
 
 ```python
 import asyncio
 from cloudflare_research import CloudflareBypass, CloudflareBypassConfig
 
-async def main():
+async def simple_example():
+    """Basic request to a Cloudflare-protected site."""
     config = CloudflareBypassConfig(
         max_concurrent_requests=10,
         solve_javascript_challenges=True,
@@ -59,24 +118,135 @@ async def main():
     )
 
     async with CloudflareBypass(config) as bypass:
-        result = await bypass.get("https://example.com")
-        print(f"Status: {result.status_code}")
-        print(f"Success: {result.success}")
+        # Make a request
+        response = await bypass.get("https://example.com")
 
-asyncio.run(main())
+        # Check results
+        print(f"Status: {response.status_code}")
+        print(f"Success: {response.success}")
+        print(f"Cloudflare detected: {response.is_cloudflare_protected()}")
+
+        if response.is_cloudflare_protected():
+            print(f"CF-RAY: {response.get_cf_ray()}")
+
+# Run the example
+asyncio.run(simple_example())
+```
+
+#### Production Configuration Example
+
+```python
+async def production_example():
+    """Production-ready configuration with error handling."""
+    config = CloudflareBypassConfig(
+        # Performance settings
+        max_concurrent_requests=100,
+        requests_per_second=10.0,
+        timeout=30.0,
+
+        # Challenge solving
+        solve_javascript_challenges=True,
+        solve_turnstile_challenges=True,
+        challenge_timeout=45.0,
+
+        # Browser emulation
+        enable_tls_fingerprinting=True,
+        browser_version="120.0.0.0",
+        randomize_headers=True,
+
+        # Monitoring
+        enable_monitoring=True
+    )
+
+    try:
+        async with CloudflareBypass(config) as bypass:
+            response = await bypass.get("https://protected-site.com")
+
+            if response.success:
+                print(f"✓ Request successful: {response.status_code}")
+                data = await response.json()  # If JSON response
+                print(f"Data received: {len(str(data))} characters")
+            else:
+                print(f"✗ Request failed: {response.status_code}")
+
+    except Exception as e:
+        print(f"Error: {e}")
+
+asyncio.run(production_example())
+```
+
+#### Concurrent Requests Example
+
+```python
+async def concurrent_example():
+    """Handle multiple requests concurrently."""
+    config = CloudflareBypassConfig(
+        max_concurrent_requests=20,
+        requests_per_second=5.0
+    )
+
+    urls = [
+        "https://example.com/page1",
+        "https://example.com/page2",
+        "https://example.com/page3",
+        "https://example.com/page4",
+        "https://example.com/page5"
+    ]
+
+    async with CloudflareBypass(config) as bypass:
+        # Create tasks for all URLs
+        tasks = [bypass.get(url) for url in urls]
+
+        # Execute concurrently
+        responses = await asyncio.gather(*tasks, return_exceptions=True)
+
+        # Process results
+        successful = 0
+        for i, response in enumerate(responses):
+            if isinstance(response, Exception):
+                print(f"URL {i+1}: Error - {response}")
+            else:
+                print(f"URL {i+1}: {response.status_code}")
+                if response.status_code < 400:
+                    successful += 1
+
+        print(f"Success rate: {successful}/{len(urls)} ({successful/len(urls)*100:.1f}%)")
+
+asyncio.run(concurrent_example())
 ```
 
 ### Command Line Testing
 
+The repository includes several test scripts for validation:
+
 ```bash
-# Run detailed bypass analysis
+# Run detailed bypass analysis (recommended first test)
 python tests/detailed_bypass_analysis.py
 
 # Run high concurrency test
 python tests/high_concurrency_test.py
 
-# Run performance validation
+# Run performance validation against specifications
 python tests/performance_report.py
+
+# Test against specific target (replace with your test URL)
+python tests/detailed_bypass_analysis.py --target https://your-test-site.com
+```
+
+### CLI Interface (Coming Soon)
+
+```bash
+# Install CLI tools
+pip install -e .[cli]
+
+# Make single request
+cloudflare-research request https://example.com
+
+# Run benchmark
+cloudflare-research benchmark https://example.com --concurrency 50
+
+# Generate performance report
+cloudflare-research report --output results.json
 ```
 
 ## Configuration Options
@@ -280,11 +450,61 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 This tool is provided for educational and research purposes only. Users are responsible for ensuring their usage complies with applicable laws, regulations, and terms of service. The authors disclaim any responsibility for misuse or damages resulting from the use of this software.
 
+## Documentation
+
+### Quick Links
+
+- **📖 Full Documentation**: https://cloudflare-bypass-research.readthedocs.io
+- **🚀 Installation Guide**: [docs/user_guide/installation.rst](docs/user_guide/installation.rst)
+- **⚙️ Configuration Guide**: [docs/user_guide/configuration.rst](docs/user_guide/configuration.rst)
+- **💡 Examples & Tutorials**: [docs/user_guide/examples.rst](docs/user_guide/examples.rst)
+- **🔧 Troubleshooting**: [docs/user_guide/troubleshooting.rst](docs/user_guide/troubleshooting.rst)
+- **🏗️ API Reference**: [docs/api/](docs/api/)
+
+### Building Documentation Locally
+
+```bash
+# Install documentation dependencies
+pip install -r docs/requirements.txt
+
+# Build HTML documentation
+cd docs
+make html
+
+# Open documentation
+# Windows: start _build/html/index.html
+# macOS: open _build/html/index.html
+# Linux: xdg-open _build/html/index.html
+```
+
+### Documentation Structure
+
+```
+docs/
+├── index.rst                    # Main documentation page
+├── user_guide/                  # User guides and tutorials
+│   ├── installation.rst         # Installation instructions
+│   ├── configuration.rst        # Configuration options
+│   ├── examples.rst             # Usage examples
+│   └── troubleshooting.rst      # Common issues and solutions
+├── api/                         # API documentation
+│   ├── bypass.rst               # Main CloudflareBypass class
+│   ├── challenge.rst            # Challenge system
+│   ├── browser.rst              # Browser emulation
+│   ├── http.rst                 # HTTP client
+│   └── ...                      # Other modules
+└── development/                 # Development guides
+    ├── architecture.rst         # System architecture
+    ├── testing.rst              # Testing guidelines
+    └── contributing.rst         # Contributing guide
+```
+
 ## Support
 
-- **Issues**: Report bugs and feature requests via GitHub Issues
-- **Discussions**: Join the community discussion forum
-- **Security**: Report security vulnerabilities privately via email
+- **📋 Issues**: Report bugs and feature requests via [GitHub Issues](https://github.com/yourusername/cloudflare-bypass-research/issues)
+- **💬 Discussions**: Join the community [discussion forum](https://github.com/yourusername/cloudflare-bypass-research/discussions)
+- **🔒 Security**: Report security vulnerabilities privately via email to security@example.com
+- **📚 Documentation**: Complete guides available at https://cloudflare-bypass-research.readthedocs.io
 
 ## Roadmap
 

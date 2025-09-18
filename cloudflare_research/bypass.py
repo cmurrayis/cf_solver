@@ -76,6 +76,7 @@ class CloudflareBypassConfig:
     # TLS settings
     enable_tls_fingerprinting: bool = True
     ja3_randomization: bool = True
+    randomize_headers: bool = True
 
     # Monitoring
     enable_monitoring: bool = True

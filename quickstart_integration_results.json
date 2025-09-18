@@ -1,0 +1,77 @@
+{
+  "test_execution": {
+    "start_time": "2025-09-18T14:08:49.714310",
+    "end_time": "2025-09-18T14:09:24.613332",
+    "total_duration_seconds": 34.899001598358154
+  },
+  "test_summary": {
+    "total_tests": 8,
+    "passed_tests": 8,
+    "failed_tests": 0,
+    "success_rate": 1.0,
+    "overall_success": true
+  },
+  "individual_test_results": {
+    "basic_imports": {
+      "success": true,
+      "message": "All imports and basic instantiation successful",
+      "imports_tested": [
+        "cloudflare_research.CloudflareBypass",
+        "cloudflare_research.CloudflareBypassConfig"
+      ]
+    },
+    "simple_request_example": {
+      "success": true,
+      "status_code": 200,
+      "response_time": 1.6550934314727783,
+      "url_tested": "https://httpbin.org/get",
+      "message": "Simple request example works correctly"
+    },
+    "production_configuration_example": {
+      "success": true,
+      "config_validated": true,
+      "request_successful": true,
+      "browser_version_set": true,
+      "message": "Production configuration example works correctly"
+    },
+    "concurrent_requests_example": {
+      "success": true,
+      "total_requests": 5,
+      "successful_requests": 5,
+      "failed_requests": 0,
+      "success_rate": 1.0,
+      "total_time": 1.6883697509765625,
+      "concurrent_execution_efficient": true,
+      "message": "Concurrent requests example works correctly"
+    },
+    "error_handling": {
+      "success": true,
+      "invalid_domain_handled": true,
+      "timeout_handling_tested": true,
+      "message": "Error handling works correctly"
+    },
+    "configuration_validation": {
+      "success": true,
+      "valid_config_accepted": true,
+      "advanced_options_work": true,
+      "message": "Configuration validation works correctly"
+    },
+    "performance_characteristics": {
+      "success": true,
+      "avg_response_time": 1.1402085304260254,
+      "max_response_time": 2.8639142513275146,
+      "performance_acceptable": true,
+      "message": "Performance characteristics are acceptable"
+    },
+    "resource_cleanup": {
+      "success": true,
+      "context_manager_cleanup": true,
+      "manual_cleanup": true,
+      "message": "Resource cleanup works correctly"
+    }
+  },
+  "recommendations": [
+    "All quickstart scenarios validated successfully",
+    "CloudflareBypass is ready for deployment"
+  ]
+}
