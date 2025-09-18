@@ -17,6 +17,15 @@ Key Features:
 import time
 from typing import Dict, List, Any
 
+# Simple scraper interface (cloudscraper-like) - PRIMARY INTERFACE
+from .scraper import (
+    create_scraper,
+    CloudflareScraper,
+    ScrapeResponse,
+    get,
+    post,
+)
+
 # Main bypass interface
 from .bypass import (
     CloudflareBypass,
@@ -259,6 +268,13 @@ def get_module_info() -> Dict[str, Any]:
 
 # Export public API
 __all__ = [
+    # Simple interface (cloudscraper-like) - PRIMARY
+    "create_scraper",
+    "CloudflareScraper",
+    "ScrapeResponse",
+    "get",
+    "post",
+
     # Main classes
     "CloudflareBypass",
     "CloudflareBypassConfig",

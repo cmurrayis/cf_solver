@@ -103,14 +103,38 @@ brew install python@3.11 curl
 
 ### Basic Usage Examples
 
-#### Simple Request Example
+#### Simple Interface (Recommended - Drop-in replacement for cloudscraper)
+
+```python
+import cloudflare_research as cfr
+
+# Just like cloudscraper!
+scraper = cfr.create_scraper()
+response = scraper.get("https://protected-site.com")
+print(response.text)
+
+# Or one-off requests
+response = cfr.get("https://protected-site.com")
+print(response.text)
+
+# POST requests
+response = cfr.post("https://protected-site.com/api", json={"key": "value"})
+data = response.json()
+
+# Context manager (automatically closes)
+with cfr.create_scraper() as scraper:
+    response = scraper.get("https://protected-site.com")
+    print(f"Status: {response.status_code}")
+```
+
+#### Advanced Async Interface
 
 ```python
 import asyncio
 from cloudflare_research import CloudflareBypass, CloudflareBypassConfig
 
-async def simple_example():
-    """Basic request to a Cloudflare-protected site."""
+async def advanced_example():
+    """Advanced async request with full configuration."""
     config = CloudflareBypassConfig(
         max_concurrent_requests=10,
         solve_javascript_challenges=True,
