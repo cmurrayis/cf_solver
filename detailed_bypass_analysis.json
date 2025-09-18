@@ -1,0 +1,202 @@
+{
+  "test_summary": {
+    "target_url": "https://kick.com/api/v1/channels/adinross",
+    "total_requests": 10,
+    "successful_requests": 10,
+    "success_rate": 100.0,
+    "avg_response_time": 0.9130444765090943
+  },
+  "cloudflare_analysis": {
+    "cloudflare_detected": 10,
+    "cloudflare_success_rate": 100.0,
+    "cf_ray_ids": [
+      "980d5080ea02d711-BNE",
+      "980d5089a8d3d711-BNE",
+      "980d50924aadd711-BNE",
+      "980d509a6aabd711-BNE",
+      "980d50a32ba0d711-BNE",
+      "980d50ae58dfd711-BNE",
+      "980d50b71a23d711-BNE",
+      "980d50bf7842d711-BNE",
+      "980d50c7de55d711-BNE",
+      "980d50d0bd58d711-BNE"
+    ],
+    "cf_cookie_types": {}
+  },
+  "challenge_analysis": {
+    "challenges_detected": 0,
+    "challenges_solved": 0,
+    "challenge_types": [],
+    "solve_success_rate": 0
+  },
+  "status_breakdown": {
+    "200": {
+      "count": 10,
+      "examples": [
+        {
+          "request_id": 1,
+          "recommendation": "[WARNING] Success but no CF cookies (may not be protected)"
+        },
+        {
+          "request_id": 2,
+          "recommendation": "[WARNING] Success but no CF cookies (may not be protected)"
+        },
+        {
+          "request_id": 3,
+          "recommendation": "[WARNING] Success but no CF cookies (may not be protected)"
+        }
+      ]
+    }
+  },
+  "bypass_methods": {
+    "direct_access": 10
+  },
+  "detailed_analyses": [
+    {
+      "request_id": 1,
+      "status_code": 200,
+      "success": true,
+      "response_time": 0.943504810333252,
+      "is_cloudflare": true,
+      "cf_ray": "980d5080ea02d711-BNE",
+      "cf_cookies": [],
+      "challenge_detected": false,
+      "challenge_type": null,
+      "challenge_solved": false,
+      "bypass_method": "direct_access",
+      "recommendation": "[WARNING] Success but no CF cookies (may not be protected)"
+    },
+    {
+      "request_id": 2,
+      "status_code": 200,
+      "success": true,
+      "response_time": 0.8746886253356934,
+      "is_cloudflare": true,
+      "cf_ray": "980d5089a8d3d711-BNE",
+      "cf_cookies": [],
+      "challenge_detected": false,
+      "challenge_type": null,
+      "challenge_solved": false,
+      "bypass_method": "direct_access",
+      "recommendation": "[WARNING] Success but no CF cookies (may not be protected)"
+    },
+    {
+      "request_id": 3,
+      "status_code": 200,
+      "success": true,
+      "response_time": 0.7998967170715332,
+      "is_cloudflare": true,
+      "cf_ray": "980d50924aadd711-BNE",
+      "cf_cookies": [],
+      "challenge_detected": false,
+      "challenge_type": null,
+      "challenge_solved": false,
+      "bypass_method": "direct_access",
+      "recommendation": "[WARNING] Success but no CF cookies (may not be protected)"
+    },
+    {
+      "request_id": 4,
+      "status_code": 200,
+      "success": true,
+      "response_time": 0.8856873512268066,
+      "is_cloudflare": true,
+      "cf_ray": "980d509a6aabd711-BNE",
+      "cf_cookies": [],
+      "challenge_detected": false,
+      "challenge_type": null,
+      "challenge_solved": false,
+      "bypass_method": "direct_access",
+      "recommendation": "[WARNING] Success but no CF cookies (may not be protected)"
+    },
+    {
+      "request_id": 5,
+      "status_code": 200,
+      "success": true,
+      "response_time": 1.2328789234161377,
+      "is_cloudflare": true,
+      "cf_ray": "980d50a32ba0d711-BNE",
+      "cf_cookies": [],
+      "challenge_detected": false,
+      "challenge_type": null,
+      "challenge_solved": false,
+      "bypass_method": "direct_access",
+      "recommendation": "[WARNING] Success but no CF cookies (may not be protected)"
+    },
+    {
+      "request_id": 6,
+      "status_code": 200,
+      "success": true,
+      "response_time": 0.9246811866760254,
+      "is_cloudflare": true,
+      "cf_ray": "980d50ae58dfd711-BNE",
+      "cf_cookies": [],
+      "challenge_detected": false,
+      "challenge_type": null,
+      "challenge_solved": false,
+      "bypass_method": "direct_access",
+      "recommendation": "[WARNING] Success but no CF cookies (may not be protected)"
+    },
+    {
+      "request_id": 7,
+      "status_code": 200,
+      "success": true,
+      "response_time": 0.8252682685852051,
+      "is_cloudflare": true,
+      "cf_ray": "980d50b71a23d711-BNE",
+      "cf_cookies": [],
+      "challenge_detected": false,
+      "challenge_type": null,
+      "challenge_solved": false,
+      "bypass_method": "direct_access",
+      "recommendation": "[WARNING] Success but no CF cookies (may not be protected)"
+    },
+    {
+      "request_id": 8,
+      "status_code": 200,
+      "success": true,
+      "response_time": 0.8381164073944092,
+      "is_cloudflare": true,
+      "cf_ray": "980d50bf7842d711-BNE",
+      "cf_cookies": [],
+      "challenge_detected": false,
+      "challenge_type": null,
+      "challenge_solved": false,
+      "bypass_method": "direct_access",
+      "recommendation": "[WARNING] Success but no CF cookies (may not be protected)"
+    },
+    {
+      "request_id": 9,
+      "status_code": 200,
+      "success": true,
+      "response_time": 0.9151327610015869,
+      "is_cloudflare": true,
+      "cf_ray": "980d50c7de55d711-BNE",
+      "cf_cookies": [],
+      "challenge_detected": false,
+      "challenge_type": null,
+      "challenge_solved": false,
+      "bypass_method": "direct_access",
+      "recommendation": "[WARNING] Success but no CF cookies (may not be protected)"
+    },
+    {
+      "request_id": 10,
+      "status_code": 200,
+      "success": true,
+      "response_time": 0.890589714050293,
+      "is_cloudflare": true,
+      "cf_ray": "980d50d0bd58d711-BNE",
+      "cf_cookies": [],
+      "challenge_detected": false,
+      "challenge_type": null,
+      "challenge_solved": false,
+      "bypass_method": "direct_access",
+      "recommendation": "[WARNING] Success but no CF cookies (may not be protected)"
+    }
+  ],
+  "improvement_recommendations": [
+    "[SUCCESS] Perfect success rate achieved!"
+  ],
+  "optimization_strategies": [
+    "[OPTIMAL] Already at optimal performance!"
+  ]
+}
