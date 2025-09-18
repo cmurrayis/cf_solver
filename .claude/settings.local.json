@@ -22,7 +22,12 @@
       "Read(//c/Users/cameron/AppData/Local/Programs/Python/Python313/Lib/site-packages/mini_racer-0.12.4.dist-info/**)",
       "Bash(timeout 30 python tests/high_concurrency_test.py)",
       "Bash(timeout 300 python testsquickstart_integration_test.py)",
-      "Bash(timeout 300 python tests/quickstart_integration_test.py)"
+      "Bash(timeout 300 python tests/quickstart_integration_test.py)",
+      "Bash(xcopy:*)",
+      "Bash(copy requirements.txt cloudflare_scraper_deployment )",
+      "Bash(copy setup.py cloudflare_scraper_deployment )",
+      "Bash(copy quick_server_test.py cloudflare_scraper_deployment)",
+      "Bash(robocopy:*)"
     ],
     "deny": [],
     "ask": []
