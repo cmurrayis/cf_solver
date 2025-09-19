@@ -784,7 +784,16 @@ class BrowserFingerprintManager:
 
     def _generate_user_agent(self, chrome_version: str) -> str:
         """Generate user agent string."""
-        return USER_AGENTS.get(chrome_version, USER_AGENTS[DEFAULT_CHROME_VERSION])
+        # Extract major version and map to simplified format
+        major_version = chrome_version.split('.')[0]
+        simplified_version = f"{major_version}.0.0.0"
+
+        # Try to get user agent, fallback to generating one
+        if simplified_version in USER_AGENTS:
+            return USER_AGENTS[simplified_version]
+
+        # Generate user agent with the actual chrome version
+        return f"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/{chrome_version} Safari/537.36"
 
     def _generate_canvas_fingerprint(self) -> str:
         """Generate canvas fingerprint."""
