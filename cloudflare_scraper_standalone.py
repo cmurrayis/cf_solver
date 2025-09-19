@@ -571,10 +571,24 @@ class ChromeTLSFingerprintManager:
 
     def get_fingerprint_by_string(self, version_string: str) -> TLSFingerprint:
         """Get TLS fingerprint by version string."""
-        for chrome_version in ChromeVersion:
-            if chrome_version.value == version_string:
-                return self.get_fingerprint(chrome_version)
-        raise ValueError(f"Unsupported Chrome version string: {version_string}")
+        # Extract major version from detailed version strings like "124.0.6367.60"
+        major_version = version_string.split('.')[0]
+
+        # Map to ChromeVersion enum
+        version_map = {
+            "124": ChromeVersion.CHROME_124,
+            "123": ChromeVersion.CHROME_123,
+            "122": ChromeVersion.CHROME_122,
+            "121": ChromeVersion.CHROME_121,
+        }
+
+        chrome_version = version_map.get(major_version)
+        if chrome_version:
+            return self.get_fingerprint(chrome_version)
+
+        # Fallback to latest version if unsupported
+        logger.warning(f"Unsupported Chrome version {version_string}, falling back to Chrome 124")
+        return self.get_fingerprint(ChromeVersion.CHROME_124)
 
     def get_ja3_fingerprint(self, fingerprint: TLSFingerprint) -> str:
         """Generate JA3 fingerprint string for the TLS configuration."""
