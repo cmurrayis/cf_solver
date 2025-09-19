@@ -27,7 +27,16 @@
       "Bash(copy requirements.txt cloudflare_scraper_deployment )",
       "Bash(copy setup.py cloudflare_scraper_deployment )",
       "Bash(copy quick_server_test.py cloudflare_scraper_deployment)",
-      "Bash(robocopy:*)"
+      "Bash(robocopy:*)",
+      "Read(**)",
+      "Edit(**)",
+      "Write(**)",
+      "Bash(*)",
+      "LS(**)",
+      "Grep(**)",
+      "Glob(**)",
+      "WebFetch",
+      "MCP"
     ],
     "deny": [],
     "ask": []
