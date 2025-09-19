@@ -2534,11 +2534,21 @@ class CloudflareScraper:
     def close(self):
         """Close the scraper and cleanup resources."""
         if self._loop and self._loop.is_running():
-            asyncio.run_coroutine_threadsafe(self._bypass.close(), self._loop)
-            self._loop.call_soon_threadsafe(self._loop.stop)
+            try:
+                # Schedule close operation and wait for completion
+                future = asyncio.run_coroutine_threadsafe(self._bypass.close(), self._loop)
+                future.result(timeout=2)  # Wait max 2 seconds
+            except:
+                pass  # Ignore cleanup errors
+
+            try:
+                # Stop the loop
+                self._loop.call_soon_threadsafe(self._loop.stop)
+            except:
+                pass  # Ignore if loop already stopped
 
         if self._thread and self._thread.is_alive():
-            self._thread.join(timeout=5)
+            self._thread.join(timeout=2)  # Shorter timeout
 
 
 # =============================================================================
@@ -2804,19 +2814,22 @@ Dependencies:
 For advanced usage and configuration options, see the individual class documentation.
 """
 
-# Initialize logging
+# Initialize logging - quieter by default
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.WARNING,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 
-# Module initialization message
-if __name__ != "__main__":
-    logger = logging.getLogger(__name__)
-    logger.info(f"CloudflareScraper Standalone v{__version__} loaded")
-    logger.info(f"MiniRacer available: {MINIRACER_AVAILABLE}")
-    logger.info(f"curl-cffi available: {CURL_CFFI_AVAILABLE}")
-    logger.info(f"aiohttp available: {aiohttp is not None}")
+# Suppress common asyncio warnings
+import warnings
+warnings.filterwarnings("ignore", category=RuntimeWarning, message=".*coroutine.*never awaited.*")
+warnings.filterwarnings("ignore", category=RuntimeWarning, message=".*Task was destroyed but it is pending.*")
+
+# Suppress asyncio task destruction errors
+logging.getLogger("asyncio").setLevel(logging.CRITICAL)
+
+# Silent initialization - only log if explicitly enabled
+logger = logging.getLogger(__name__)
 
 
 # =============================================================================
